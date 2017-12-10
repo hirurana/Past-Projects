@@ -1,0 +1,7 @@
+# robots.txt generated at http://www.mcanerin.com
+User-agent: *
+Disallow: 
+Disallow: /CSS/style.css
+Disallow: /images/
+Disallow: /stats/
+Sitemap: http://www.porshhair.com/sitemap.xml

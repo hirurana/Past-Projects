@@ -1,0 +1,36 @@
+#include "graphics.h"
+
+int main(void)
+{
+  //main chart
+  drawLine(50,50,50,250);
+  drawLine(45,250,300,250);
+
+  //markers for chart
+  drawLine(45,100,50,100);
+  drawLine(45,150,50,150);
+  drawLine(45,200,50,200);
+  drawLine(45,250,50,250);
+
+  //adding numbers on y axis
+  drawString("150",15,105);
+  drawString("100",15,155);
+  drawString("50",25,205);
+  drawString("0",35,255);
+
+  //adding bars
+  setColour(blue);
+  fillRect(50,190,50,60);
+  setColour(green);
+  fillRect(100,115,50,135);
+  setColour(red);
+  fillRect(150,135,50,115);
+  setColour(yellow);
+  fillRect(200,160,50,90);
+  setColour(pink);
+  fillRect(250,115,50,135);
+
+  //adding labels to the
+  
+  
+}

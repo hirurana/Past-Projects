@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Form</title>
+</head>
+<body>
+	<h1>A Form</h1>
+	<form name="loginForm">
+		Username: <input id="username" type="text" name="Username" Value="example" onblur="if (this.value == '') {this.value ='example';}" onfocus="if (this.value =='example') {this.value ='';}"/></br>
+		Password: <input id="password" type="password" name="password" value="123456" onblur="if (this.value =='') {this.value ='123456';}" onfocus="if (this.value =='123456') {this.value ='';}"/></br>
+		<button type="button" onclick="userValidation()">Click ME!</button>
+	<script>
+	function userValidation()
+	{
+	var x=document.forms["loginForm"]["Username"].value;
+	if (x=="null"|| x=="")
+		{
+		alert("Username is incorrect");
+		}
+	}
+	function passValidation()
+	{
+	var x=document.getElementById("password").value;
+	if (x=="null"|| x=="")
+		{
+		alert("Password is incorrect");
+		}
+	}
+	</script>
+</body>
+</html>
+
+

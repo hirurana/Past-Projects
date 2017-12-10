@@ -1,0 +1,426 @@
+Index: Doc/library/io.rst
+===================================================================
+--- Doc/library/io.rst	(revision 72121)
++++ Doc/library/io.rst	(working copy)
+@@ -361,6 +361,13 @@
+    :class:`BufferedIOBase` provides or overrides these methods in addition to
+    those from :class:`IOBase`:
+ 
++   .. method:: detach()
++
++      Disconnect this buffer from its underlying raw stream and return it.
++
++      After the raw stream has been detached, the buffer is in an unusable
++      state.
++
+    .. method:: read([n])
+ 
+       Read and return up to *n* bytes.  If the argument is omitted, ``None``, or
+@@ -547,7 +554,9 @@
+ 
+    *max_buffer_size* is unused and deprecated.
+ 
+-   :class:`BufferedRWPair` implements all of :class:`BufferedIOBase`\'s methods.
++   :class:`BufferedRWPair` implements all of :class:`BufferedIOBase`\'s methods
++   except for :meth:`~BufferedIOBase.detach`, which raises
++   :exc:`UnsupportedOperation`.
+ 
+ 
+ .. class:: BufferedRandom(raw[, buffer_size[, max_buffer_size]])
+@@ -588,6 +597,13 @@
+       A string, a tuple of strings, or ``None``, indicating the newlines
+       translated so far.
+ 
++   .. method:: detach()
++
++      Separate the underlying buffer from the :class:`TextIOBase` and return it.
++
++      After the underlying buffer has been detached, the :class:`TextIOBase` is
++      in an unusable state.
++
+    .. method:: read(n)
+ 
+       Read and return at most *n* characters from the stream as a single
+Index: Lib/_pyio.py
+===================================================================
+--- Lib/_pyio.py	(revision 72121)
++++ Lib/_pyio.py	(working copy)
+@@ -642,6 +642,15 @@
+         """
+         self._unsupported("write")
+ 
++    def detach(self) -> None:
++        """
++        Disconnect this buffer from its underlying raw stream and return it.
++
++        After the raw stream has been detached, the buffer is in an unusable
++        state.
++        """
++        self._unsupported("detach")
++
+ io.BufferedIOBase.register(BufferedIOBase)
+ 
+ 
+@@ -696,6 +705,12 @@
+                 pass  # If flush() fails, just give up
+             self.raw.close()
+ 
++    def detach(self):
++        self.flush()
++        raw = self.raw
++        self.raw = None
++        return raw
++
+     ### Inquiries ###
+ 
+     def seekable(self):
+@@ -817,6 +832,9 @@
+         del self._buffer[pos:]
+         return self.seek(pos)
+ 
++    def detach(self):
++        return self
++
+     def readable(self):
+         return True
+ 
+@@ -1236,6 +1254,15 @@
+         """
+         self._unsupported("readline")
+ 
++    def detach(self) -> None:
++        """
++        Separate the underlying buffer from the TextIOBase and return it.
++
++        After the underlying buffer has been detached, the TextIO is in an
++        unusable state.
++        """
++        self._unsupported("detach")
++
+     @property
+     def encoding(self):
+         """Subclasses should override."""
+@@ -1647,6 +1674,12 @@
+         self.seek(pos)
+         return self.buffer.truncate()
+ 
++    def detach(self):
++        self.flush()
++        buffer = self.buffer
++        self.buffer = None
++        return buffer
++
+     def seek(self, cookie, whence=0):
+         if self.closed:
+             raise ValueError("tell on closed file")
+Index: Lib/test/test_io.py
+===================================================================
+--- Lib/test/test_io.py	(revision 72130)
++++ Lib/test/test_io.py	(working copy)
+@@ -526,6 +526,11 @@
+ class CommonBufferedTests:
+     # Tests common to BufferedReader, BufferedWriter and BufferedRandom
+ 
++    def test_detach(self):
++        raw = self.MockRawIO()
++        buf = self.tp(raw)
++        self.assertIs(buf.detach(), raw)
++
+     def test_fileno(self):
+         rawio = self.MockRawIO()
+         bufio = self.tp(rawio)
+@@ -811,6 +816,14 @@
+         bufio.flush()
+         self.assertEquals(b"".join(rawio._write_stack), b"abcghi")
+ 
++    def test_detach_flush(self):
++        raw = self.MockRawIO()
++        buf = self.tp(raw)
++        buf.write(b"howdy!")
++        self.assertFalse(raw._write_stack)
++        buf.detach()
++        self.assertEqual(raw._write_stack, [b"howdy!"])
++
+     def test_write(self):
+         # Write to the buffered IO but don't overflow the buffer.
+         writer = self.MockRawIO()
+@@ -1052,6 +1065,10 @@
+         pair = self.tp(self.MockRawIO(), self.MockRawIO())
+         self.assertFalse(pair.closed)
+ 
++    def test_detach(self):
++        pair = self.tp(self.MockRawIO(), self.MockRawIO())
++        self.assertRaises(self.UnsupportedOperation, pair.detach)
++
+     def test_constructor_max_buffer_size_deprecation(self):
+         with support.check_warnings() as w:
+             warnings.simplefilter("always", DeprecationWarning)
+@@ -1480,6 +1497,18 @@
+         self.assertRaises(TypeError, t.__init__, b, newline=42)
+         self.assertRaises(ValueError, t.__init__, b, newline='xyzzy')
+ 
++    def test_detach(self):
++        r = self.BytesIO()
++        b = self.BufferedWriter(r)
++        t = self.TextIOWrapper(b)
++        self.assertIs(t.detach(), b)
++
++        t = self.TextIOWrapper(b, encoding="ascii")
++        t.write("howdy")
++        self.assertFalse(r.getvalue())
++        t.detach()
++        self.assertEqual(r.getvalue(), b"howdy")
++
+     def test_repr(self):
+         raw = self.BytesIO("hello".encode("utf-8"))
+         b = self.BufferedReader(raw)
+Index: Modules/_io/bufferedio.c
+===================================================================
+--- Modules/_io/bufferedio.c	(revision 72121)
++++ Modules/_io/bufferedio.c	(working copy)
+@@ -73,6 +73,18 @@
+     return NULL;
+ }
+ 
++PyDoc_STRVAR(BufferedIOBase_detach_doc,
++    "Disconnect this buffer from its underlying raw stream and return it.\n"
++    "\n"
++    "After the raw stream has been detached, the buffer is in an unusable\n"
++    "state.\n");
++
++static PyObject *
++BufferedIOBase_detach(PyObject *self)
++{
++    return BufferedIOBase_unsupported("detach");
++}
++
+ PyDoc_STRVAR(BufferedIOBase_read_doc,
+     "Read and return up to n bytes.\n"
+     "\n"
+@@ -127,6 +139,7 @@
+ 
+ 
+ static PyMethodDef BufferedIOBase_methods[] = {
++    {"detach", (PyCFunction)BufferedIOBase_detach, METH_NOARGS, BufferedIOBase_detach_doc},
+     {"read", BufferedIOBase_read, METH_VARARGS, BufferedIOBase_read_doc},
+     {"read1", BufferedIOBase_read1, METH_VARARGS, BufferedIOBase_read1_doc},
+     {"readinto", BufferedIOBase_readinto, METH_VARARGS, NULL},
+@@ -181,6 +194,7 @@
+ 
+     PyObject *raw;
+     int ok;    /* Initialized? */
++    int detached;
+     int readable;
+     int writable;
+     
+@@ -260,15 +274,25 @@
+ 
+ #define CHECK_INITIALIZED(self) \
+     if (self->ok <= 0) { \
+-        PyErr_SetString(PyExc_ValueError, \
+-            "I/O operation on uninitialized object"); \
++        if (self->detached) { \
++            PyErr_SetString(PyExc_ValueError, \
++                 "raw stream has been detached"); \
++        } else { \
++            PyErr_SetString(PyExc_ValueError, \
++                "I/O operation on uninitialized object"); \
++        } \
+         return NULL; \
+     }
+ 
+ #define CHECK_INITIALIZED_INT(self) \
+     if (self->ok <= 0) { \
+-        PyErr_SetString(PyExc_ValueError, \
+-            "I/O operation on uninitialized object"); \
++        if (self->detached) { \
++            PyErr_SetString(PyExc_ValueError, \
++                 "raw stream has been detached"); \
++        } else { \
++            PyErr_SetString(PyExc_ValueError, \
++                "I/O operation on uninitialized object"); \
++        } \
+         return -1; \
+     }
+ 
+@@ -430,6 +454,25 @@
+     return res;
+ }
+ 
++/* detach */
++
++static PyObject *
++BufferedIOMixin_detach(BufferedObject *self, PyObject *args)
++{
++    PyObject *raw, *res;
++    CHECK_INITIALIZED(self)
++    res = PyObject_CallMethodObjArgs((PyObject *)self, _PyIO_str_flush, NULL);
++    if (res == NULL)
++        return NULL;
++    Py_DECREF(res);
++    Py_INCREF(self->raw);
++    raw = self->raw;
++    Py_CLEAR(self->raw);
++    self->detached = 1;
++    self->ok = 0;
++    return raw;
++}
++
+ /* Inquiries */
+ 
+ static PyObject *
+@@ -1101,6 +1144,7 @@
+     PyObject *raw;
+ 
+     self->ok = 0;
++    self->detached = 0;
+ 
+     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|n:BufferedReader", kwlist,
+                                      &raw, &buffer_size)) {
+@@ -1387,6 +1431,7 @@
+ 
+ static PyMethodDef BufferedReader_methods[] = {
+     /* BufferedIOMixin methods */
++    {"detach", (PyCFunction)BufferedIOMixin_detach, METH_NOARGS},
+     {"flush", (PyCFunction)BufferedIOMixin_flush, METH_NOARGS},
+     {"close", (PyCFunction)BufferedIOMixin_close, METH_NOARGS},
+     {"seekable", (PyCFunction)BufferedIOMixin_seekable, METH_NOARGS},
+@@ -1499,6 +1544,7 @@
+     PyObject *raw;
+ 
+     self->ok = 0;
++    self->detached = 1;
+ 
+     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedReader", kwlist,
+                                      &raw, &buffer_size, &max_buffer_size)) {
+@@ -1745,6 +1791,7 @@
+ static PyMethodDef BufferedWriter_methods[] = {
+     /* BufferedIOMixin methods */
+     {"close", (PyCFunction)BufferedIOMixin_close, METH_NOARGS},
++    {"detach", (PyCFunction)BufferedIOMixin_detach, METH_NOARGS},
+     {"seekable", (PyCFunction)BufferedIOMixin_seekable, METH_NOARGS},
+     {"readable", (PyCFunction)BufferedIOMixin_readable, METH_NOARGS},
+     {"writable", (PyCFunction)BufferedIOMixin_writable, METH_NOARGS},
+@@ -2089,6 +2136,7 @@
+     PyObject *raw;
+ 
+     self->ok = 0;
++    self->detached = 0;
+ 
+     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|nn:BufferedReader", kwlist,
+                                      &raw, &buffer_size, &max_buffer_size)) {
+@@ -2128,6 +2176,7 @@
+ static PyMethodDef BufferedRandom_methods[] = {
+     /* BufferedIOMixin methods */
+     {"close", (PyCFunction)BufferedIOMixin_close, METH_NOARGS},
++    {"detach", (PyCFunction)BufferedIOMixin_detach, METH_NOARGS},
+     {"seekable", (PyCFunction)BufferedIOMixin_seekable, METH_NOARGS},
+     {"readable", (PyCFunction)BufferedIOMixin_readable, METH_NOARGS},
+     {"writable", (PyCFunction)BufferedIOMixin_writable, METH_NOARGS},
+Index: Modules/_io/textio.c
+===================================================================
+--- Modules/_io/textio.c	(revision 72121)
++++ Modules/_io/textio.c	(working copy)
+@@ -28,6 +28,19 @@
+     return NULL;
+ }
+ 
++PyDoc_STRVAR(TextIOBase_detach_doc,
++    "Separate the underlying buffer from the TextIOBase and return it.\n"
++    "\n"
++    "After the underlying buffer has been detached, the TextIO is in an\n"
++    "unusable state.\n"
++    );
++
++static PyObject *
++TextIOBase_detach(PyObject *self)
++{
++    return _unsupported("detach");
++}
++
+ PyDoc_STRVAR(TextIOBase_read_doc,
+     "Read at most n characters from stream.\n"
+     "\n"
+@@ -93,6 +106,7 @@
+ 
+ 
+ static PyMethodDef TextIOBase_methods[] = {
++    {"detach", (PyCFunction)TextIOBase_detach, METH_NOARGS, TextIOBase_detach_doc},
+     {"read", TextIOBase_read, METH_VARARGS, TextIOBase_read_doc},
+     {"readline", TextIOBase_readline, METH_VARARGS, TextIOBase_readline_doc},
+     {"write", TextIOBase_write, METH_VARARGS, TextIOBase_write_doc},
+@@ -616,6 +630,7 @@
+ {
+     PyObject_HEAD
+     int ok; /* initialized? */
++    int detached;
+     Py_ssize_t chunk_size;
+     PyObject *buffer;
+     PyObject *encoding;
+@@ -759,6 +774,7 @@
+     int r;
+ 
+     self->ok = 0;
++    self->detached = 0;
+     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|zzzi:fileio",
+                                      kwlist, &buffer, &encoding, &errors,
+                                      &newline, &line_buffering))
+@@ -1059,19 +1075,46 @@
+ 
+ #define CHECK_INITIALIZED(self) \
+     if (self->ok <= 0) { \
+-        PyErr_SetString(PyExc_ValueError, \
+-            "I/O operation on uninitialized object"); \
++        if (self->detached) { \
++            PyErr_SetString(PyExc_ValueError, \
++                 "raw stream has been detached"); \
++        } else {                                   \
++            PyErr_SetString(PyExc_ValueError, \
++                "I/O operation on uninitialized object"); \
++        } \
+         return NULL; \
+     }
+ 
+ #define CHECK_INITIALIZED_INT(self) \
+     if (self->ok <= 0) { \
+-        PyErr_SetString(PyExc_ValueError, \
+-            "I/O operation on uninitialized object"); \
++        if (self->detached) { \
++            PyErr_SetString(PyExc_ValueError, \
++                 "raw stream has been detached"); \
++        } else {                                   \
++            PyErr_SetString(PyExc_ValueError, \
++                "I/O operation on uninitialized object"); \
++        } \
+         return -1; \
+     }
+ 
+ 
++static PyObject *
++TextIOWrapper_detach(PyTextIOWrapperObject *self)
++{
++    PyObject *buffer, *res;
++    CHECK_INITIALIZED(self);
++    res = PyObject_CallMethodObjArgs((PyObject *)self, _PyIO_str_flush, NULL);
++    if (res == NULL)
++        return NULL;
++    Py_DECREF(res);
++    Py_INCREF(self->buffer);
++    buffer = self->buffer;
++    Py_CLEAR(self->buffer);
++    self->detached = 1;
++    self->ok = 0;
++    return buffer;
++}
++
+ Py_LOCAL_INLINE(const Py_UNICODE *)
+ findchar(const Py_UNICODE *s, Py_ssize_t size, Py_UNICODE ch)
+ {
+@@ -2341,6 +2384,7 @@
+ }
+ 
+ static PyMethodDef TextIOWrapper_methods[] = {
++    {"detach", (PyCFunction)TextIOWrapper_detach, METH_NOARGS},
+     {"write", (PyCFunction)TextIOWrapper_write, METH_VARARGS},
+     {"read", (PyCFunction)TextIOWrapper_read, METH_VARARGS},
+     {"readline", (PyCFunction)TextIOWrapper_readline, METH_VARARGS},

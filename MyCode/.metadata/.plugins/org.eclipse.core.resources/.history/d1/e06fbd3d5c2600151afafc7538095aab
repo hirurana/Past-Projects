@@ -1,0 +1,18 @@
+package libraryAssignment4;
+
+public class AddingBooksTest {
+	//define the array
+	Book[] bookArray = new Book[4];
+	int count = 0;
+	
+	public static void addBook(Book name) {
+		
+	}
+
+	public static void main(String[] args) {
+		addBook(new Book("The Da Vinci Code"));
+		addBook(new Book("Le Petit Prince")); 
+		
+	}
+
+}

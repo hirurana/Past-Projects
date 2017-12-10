@@ -1,0 +1,39 @@
+<DlrInputsOutputs>
+	<Customer>
+		<UserInputs>
+			<input>Rides the Train</input>
+			<input>Uses Station</input>
+			<input>Purchases Tickets</input>
+			<input>Requests the use of a disabled lift</input>
+		</UserInputs>
+	
+		<SystemOutputs>
+			<output>Train is used</output>
+			<output>Station services are used</output>
+			<output>Tickets are purchased and stored on ticket Database</output>
+			<output>Disabled lift is used to raise a Disable to a higher level</output>
+		</SystemOutputs>
+	</Customer>
+	
+	<Staff>
+		<UserInputs>
+			<input>Controls Train</input>
+			<input>Signals Trains</input>
+			<input>Seeks if tickets are valid</input>
+			<input>Manges Station</input>
+			<input>Cleans Trains</input>
+			<input>Installs new components/ Remove old components</input>
+			<input>Oversees station/ Controls Station</input>
+		</UserInputs>
+		
+		<SystemOutputs>
+			<output>Train is controled and stoped at the right station</output>
+			<output>Train is stopped when other trains are using the same line</output>
+			<output>Tickets are scan to see if ticket id is in database</output>
+			<output>Station is under control</output>
+			<output>Train is clean</output>
+			<output>Brand new components are installed/ Old components are removed from train</output>
+			<output>Allocats cleaners/ Security to right places to control flow of passengers/ clean floors</output>
+		</SystemOutputs>
+	</Staff>
+</DlrInputsOutputs>

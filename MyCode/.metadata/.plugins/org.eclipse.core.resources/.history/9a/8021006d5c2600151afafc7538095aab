@@ -1,0 +1,22 @@
+package libraryAssignment4;
+
+public class AddingBooksTest {
+	//define the array
+	static Book[] bookArray = new Book[4];
+	static int count = 0;
+	
+	public static void addBook(String name) {
+		Book newBook = new Book(name);
+		System.out.println(newBook.getTitle());
+		bookArray[count] = newBook;
+		System.out.println(bookArray[count].getTitle();
+		
+	}
+
+	public static void main(String[] args) {
+		addBook("The Da Vinci Code");
+		addBook("Le Petit Prince"); 
+		
+	}
+
+}

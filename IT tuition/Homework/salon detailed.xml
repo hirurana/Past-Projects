@@ -1,0 +1,63 @@
+<salon>
+	<customers>
+		<person>
+			<personalInfo>
+				<firstName>Hiru</firstName>
+				<surename>Ranasinghe</surename>
+				<age>13</age>
+				<email>hiruandco@gmail.com</email>
+				<mobile>07944669916</mobile>
+				<tel>01923 682627</tel>
+				<birthDate>
+					<day>10</day>
+					<month>August</month>
+					<year>1999</year>
+				</birthDate>
+				<gender>Male</gender>
+				<address>
+					<houseNo>67</houseNo>
+					<streetName>Brair Road</streetName>
+					<area>Watford</area>
+					<county>Hertfordshire</county>
+					<postcode>WD25 0lq</postcode>
+				</address>
+			</personalInfo>
+			<serviceType>
+				<normal>Men's Cut</normal>
+				<mostFrequentService>Wash cut and blow dry</mostFrequentService>
+			</serviceType>
+		</person>
+	</customers>
+	
+	<staff>
+		<person>
+			<personalInfo>
+				<firstName>Anne</firstName>
+				<surename>Solange</surename>
+				<age>33</age>
+				<email>anne.stylist@hotmail.co.uk</email>
+				<mobile>07809463729</mobile>
+				<tel>01707251820</tel>
+				<birth>
+					<day>03</day>
+					<month>November</month>
+					<year>1979</year>
+				</birth>
+				<gender>Female</gender>
+				<address>
+					<houseNo>73</houseNo>
+					<streetName>Broadarces</streetName>
+					<area>Hatfield</area>
+					<county>Hertfordshire</county>
+					<postcode>AL10 9LE</postcode>
+				</address>
+			</personalInfo>
+			<skills>
+				<skill>
+					<type>Hair designer</type>
+					<experience>19 years</experience>
+				</skill>
+			</skills>
+		</person>
+	</staff>
+</salon>

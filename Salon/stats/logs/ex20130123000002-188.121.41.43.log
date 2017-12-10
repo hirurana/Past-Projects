@@ -1,0 +1,3 @@
+66.249.78.143 - - [22/Jan/2013:01:27:12 -0700] "GET porshhair.com/robots.txt HTTP/1.1" 200 407 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" 0 "-" "/var/chroot/home/content/61/10251861/html/robots.txt" 33200
+66.249.78.143 - - [22/Jan/2013:01:27:12 -0700] "GET porshhair.com/index.html HTTP/1.1" 200 2105 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" 0 "default-handler" "/var/chroot/home/content/61/10251861/html/index.html" 22943
+69.171.234.4 - - [22/Jan/2013:11:36:15 -0700] "GET www.porshhair.com/images/Top banner.jpg HTTP/1.1" 206 32745 "-" "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)" 0 "-" "/var/chroot/home/content/61/10251861/html/images/Top banner.jpg" 254324

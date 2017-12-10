@@ -1,0 +1,6 @@
+#include "graphics.h"
+
+int main(void)
+{
+  drawString("test",20,10);
+}

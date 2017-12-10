@@ -1,0 +1,149 @@
+package libraryAssignment4;
+import java.util.Arrays;
+
+public class Library {
+	String address;
+	int count = 0;
+	Book[] booksArray = new Book[4];
+	public Library(String libAddress){
+		address = libAddress;
+	}
+	
+	public void addBook(Book name){
+		booksArray[count] = name;
+		count += 1;
+	}
+	
+	public static void printOpeningHours(){
+		System.out.println("Open 09:00 to 17:00");
+	}
+	
+	public void printAddress(){
+		System.out.println(address);
+	}
+	
+	public void borrowBook(String bookName){
+		for (int i = 0; i < booksArray.length; i++){
+			if (booksArray[i] != null){
+				if (booksArray[i].getTitle() == bookName) {
+					if (booksArray[i].borrowed == false) {
+						booksArray[i].borrowed();
+						booksArray[i] = null;
+						System.out.println("You have borrowed " + bookName);
+					} else {
+						System.out.println(bookName + " is already borrowed");
+					}
+				}
+			} else {
+				System.out.println(bookName + " is not in this Library");
+				break;
+			}
+			
+		}
+	}
+	
+	
+	
+	public void printAvailableBooks(){
+		System.out.println();
+			for (int i = 0; i < booksArray.length; i++){
+				if (booksArray[i] != null){
+					System.out.println(booksArray[i].getTitle());
+				} else {
+					if (i == 0){
+						System.out.println("No books in this Library");
+						break;
+					} 
+				}
+			}
+	}
+	
+	public void returnBook(String bookName){
+		for (int i = 0; i < booksArray.length; i++){
+			if (booksArray[i] != null){
+				if (booksArray[i].getTitle() == bookName) {
+					if (booksArray[i].borrowed == true) {
+						booksArray[i].returned();
+						System.out.println("You have returned " + bookName);
+					} else {
+						System.out.println(bookName + " has not been borrowed");
+					}
+				}
+			} else {
+				System.out.println(bookName + " is not in this Library");
+				break;
+			}
+		}
+	}
+	
+	public int indexFinder(){
+		int index = 0;
+		for (int i = 0; i < booksArray.length; i++) {
+			//System.out.println(Arrays.toString(booksArray));
+			//System.out.println(booksArray[i]);
+			System.out.println(i);
+			if (booksArray[i] == null){
+				i = index;
+				System.out.println(i);
+				break;
+			}
+			//System.out.println(booksArray[i].getTitle());
+			//System.out.println();
+		}
+		return index;
+	}
+	
+	public static void main(String[] args) {
+		
+		// Create two libraries
+		Library firstLibrary = new Library("10 Main St."); 
+		Library secondLibrary = new Library("228 Liberty St.");
+		
+		// Add four books to the first library
+		firstLibrary.addBook(new Book("The Da Vinci Code"));
+		firstLibrary.addBook(new Book("Le Petit Prince"));
+		firstLibrary.addBook(new Book("A Tale of Two Cities")); 
+		firstLibrary.addBook(new Book("The Lord of the Rings"));
+		
+		// Print opening hours and the addresses
+		System.out.println("Library hours:"); 
+		printOpeningHours(); 
+		System.out.println();
+		
+		System.out.println("Library addresses:"); 
+		firstLibrary.printAddress(); 
+		secondLibrary.printAddress(); 
+		System.out.println();
+		
+		// Try to borrow The Lords of the Rings from both libraries
+		System.out.println("Borrowing The Lord of the Rings:"); 
+		firstLibrary.borrowBook("The Lord of the Rings");
+		firstLibrary.borrowBook("The Lord of the Rings");
+		secondLibrary.borrowBook("The Lord of the Rings"); 
+		System.out.println();
+		
+		// Print the titles of all available books from both libraries
+		System.out.println("Books available in the first library:"); 
+		firstLibrary.printAvailableBooks();
+		System.out.println();
+		System.out.println("Books available in the second library:"); 
+		secondLibrary.printAvailableBooks();
+		System.out.println();
+		
+		firstLibrary.indexFinder();
+		
+		// Return The Lords of the Rings to the first library
+		System.out.println("Returning The Lord of the Rings:"); 
+		firstLibrary.returnBook("The Lord of the Rings"); 
+		System.out.println();
+		
+		// Print the titles of available from the first library
+		System.out.println("Books available in the first library:");
+		firstLibrary.printAvailableBooks(); }
+		
+}
+
+/** if book is borrowed remove it from the list in the library
+but when the book is being returned, the program must look inside
+the list and look for the first index with a null value
+this must then be filled with the returned book's object */

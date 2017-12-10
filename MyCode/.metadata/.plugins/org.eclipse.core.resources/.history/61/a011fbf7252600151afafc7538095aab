@@ -1,0 +1,9 @@
+package libraryAssignment4;
+
+public class Book {
+
+	public Book() {
+		// TODO Auto-generated constructor stub
+	}
+
+}

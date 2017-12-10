@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.restaurantapp.TableInput"
+    tools:showIn="@layout/activity_table_input">
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true">
+
+        <Space
+            android:layout_width="7dp"
+            android:layout_height="@dimen/abc_dialog_padding_material"
+            android:layout_row="0"
+            android:layout_column="0" />
+
+        <DigitalClock
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/textClock"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:textSize="@dimen/timeClockSize"
+            android:textAlignment="center" />
+
+        <Space
+            android:layout_width="7dp"
+            android:layout_height="@dimen/abc_text_size_display_1_material"
+            android:layout_row="2"
+            android:layout_column="0"
+            android:layout_rowSpan="2" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/tableInputBoxLabel"
+            android:id="@+id/tableInputLabel"
+            android:layout_row="4"
+            android:layout_column="0"
+            android:textAlignment="center" />
+
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/abc_action_bar_default_height_material"
+            android:layout_row="5"
+            android:layout_column="0" />
+
+        <EditText
+            android:layout_width="203dp"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:ems="10"
+            android:id="@+id/inputTableNum"
+            android:layout_row="6"
+            android:layout_column="0"
+            android:textIsSelectable="false"
+            android:layout_gravity="center_horizontal"
+            android:textAlignment="center"
+            android:textSize="@dimen/abc_alert_dialog_button_bar_height" />
+
+        <Space
+            android:layout_width="7dp"
+            android:layout_height="@dimen/abc_dialog_padding_material"
+            android:layout_row="7"
+            android:layout_column="0" />
+
+        <Button
+            android:layout_width="244dp"
+            android:layout_height="58dp"
+            android:text="@string/nextLabel"
+            android:id="@+id/openCreateOrderButton"
+            android:layout_row="8"
+            android:layout_column="0"
+            android:layout_gravity="center_horizontal"
+            android:onClick="onClick"/>
+
+        <Space
+            android:layout_width="7dp"
+            android:layout_height="@dimen/abc_action_bar_content_inset_material"
+            android:layout_row="9"
+            android:layout_column="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/CannotUseTable"
+            android:id="@+id/tableUsedMessage"
+            android:layout_row="10"
+            android:layout_column="0"
+            android:textAlignment="center"
+            android:textColor="@color/redText"
+            android:visibility="invisible" />
+
+    </GridLayout>
+</RelativeLayout>
+

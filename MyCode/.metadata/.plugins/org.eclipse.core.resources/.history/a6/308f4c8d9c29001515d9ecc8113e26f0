@@ -1,0 +1,26 @@
+package JavaTutorial;
+
+public class AccessControl {
+	private String cardNumber;
+	private double expenses;
+	
+	public void charge(double amount){
+		setExpenses(getExpenses() + amount);
+	}
+	
+	public String getCardNumber(String password){
+		if (password.equals("SECRET!3*!")){
+			return cardNumber;
+		}
+		return "jerkface";
+	}
+
+	public double getExpenses() {
+		return expenses;
+	}
+
+	public void setExpenses(double expenses) {
+		this.expenses = expenses;
+	}
+
+}

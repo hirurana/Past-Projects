@@ -1,0 +1,29 @@
+given the user has username and password, user should be able to login into the application successfully and go to the homepage.
+
+INPUTS:
+#user
+username
+password
+
+OUTPUTS:
+#homepage
+application
+
+PROCESSES:
+login
+
+given the username does not exist in the application, user should be prompt to register with the application.
+
+INPUTS:
+#user
+username
+
+OUTPUTS:
+application (message to the user to register)
+
+PROCESSES:
+prompt
+#register
+
+given the user wants to register, user should be guided to register page and user should give username, firstname, lastname, D.O.B, address, contact number, password and register with the application.
+

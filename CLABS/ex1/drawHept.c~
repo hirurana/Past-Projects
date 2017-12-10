@@ -1,0 +1,8 @@
+#include "graphics.h"
+int main(void)
+{
+  drawLine(250,25,295,47);
+  drawLine(205,47,250,25);
+
+ return 0;
+}
